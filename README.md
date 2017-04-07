@@ -1,0 +1,1 @@
+# varietz.com
