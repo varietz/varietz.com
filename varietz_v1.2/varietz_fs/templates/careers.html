@@ -1,0 +1,48 @@
+{% extends 'base1.html' %}
+    {% block content %}
+    <section  class="homepage-slider" id="home-slider">
+				<div class="flexslider">
+					<ul class="slides">
+						<li>
+							<img src="http://g-ecx.images-amazon.com/images/G/31/img16/Wireless/Mobiles/CEEX/Honor6x/NoCashback/4500x900_finalday._UX1500_SX1500_.jpg" alt="" />
+						</li>
+						<li>
+							<img src="http://g-ecx.images-amazon.com/images/G/31/img17/TV/Sanyo/FullHDFest/April/1038817_Sanyo_Festival_4500x900-copy._UX1500_SX1500_.jpg" alt="" />
+						</li>
+					</ul>
+				</div>			
+	</section>
+	<br>
+    <section class="main-content">
+    			<div class="row">	
+    			{% csrf_token %}			
+					<div class="span12">
+						<h4>Careers</h4>
+						<p style="font-size: 15px;"> We are hiring for the following verticals: engineering, business development, customer care, marketing, and human resources. We are open to all experience levels. Those interested in working for a fast-paced, vibrant and dynamic organization can send their resume <a href="mailto:varietzaffil@gmail.com?subject=Resume" name="emailLink">here.</a></p>				
+					</div>				
+				</div>
+	</section>
+<script script type="text/javascript">
+$(function() {
+
+                $(document).ready(function() 
+                    {
+
+                    var slidesbox = $('.flexslider');
+           			slidesbox.empty();
+           			var slidesul = '<ul class="slides"><li><img src="/static/car1.jpg" alt="" style="height:273px;" /></li><li><img src="/static/car2.png" alt="" style="height:273px;" /></li></ul>';
+           			slidesbox.append(slidesul);
+
+                    $('.flexslider').flexslider({
+                        animation: "fade",
+                        slideshowSpeed: 4000,
+                        animationSpeed: 600,
+                        controlNav: false,
+                        directionNav: true,
+                        controlsContainer: ".flex-container" // the container that holds the flexslider
+                    });
+                });
+            });
+</script>
+	
+{% endblock %}

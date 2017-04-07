@@ -1,0 +1,577 @@
+{% extends 'base1.html' %}
+
+{% block content %}
+
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.13/css/jquery.dataTables.min.css">
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.2.4/css/buttons.dataTables.min.css">
+<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.4.0/css/font-awesome.min.css">
+<script type="text/javascript" src="https://code.highcharts.com/highcharts.js"></script>
+<style>
+    table,th, td {
+    border: 1px solid black;
+    padding: 1px;
+    text-align: left;
+    font-size: 14px;
+    table-layout: fixed;
+}
+
+/*table th {
+    font-size: 12px
+}
+*/
+    table.dataTable tbody td {
+    word-break: break-word;
+    /*vertical-align: top;*/
+}
+/* Popup container - can be anything you want */
+.popup {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* The actual popup */
+.popup .popuptext {
+    visibility: hidden;
+    width: 200px;
+    background-color: #555;
+    color: #fff;
+    text-align: left;
+    border-radius: 6px;
+    padding: 8px 8px;
+    position: absolute;
+    z-index: 1;
+    top: 125%;
+    left: 50%;
+    margin-left: -80px;
+}
+
+.popup .show {
+    visibility: visible;
+    -webkit-animation: fadeIn 1s;
+    animation: fadeIn 1s;
+}
+
+/* Add animation (fade in the popup) */
+@-webkit-keyframes fadeIn {
+    from {opacity: 0;} 
+    to {opacity: 1;}
+}
+
+@keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity:1 ;}
+}
+
+#colum5row1 {width: 100%; float: left;}
+    .data-order {float: left;}
+
+</style>
+<section class="main-content">
+    <section  class="homepage-slider" id="home-slider">
+                <div class="flexslider">
+                    <ul class="slides">
+                        <li>
+                            <img src="http://g-ecx.images-amazon.com/images/G/31/img16/Wireless/Mobiles/CEEX/Honor6x/NoCashback/4500x900_finalday._UX1500_SX1500_.jpg" alt="" />
+                        </li>
+                        <li>
+                            <img src="http://g-ecx.images-amazon.com/images/G/31/img17/TV/Sanyo/FullHDFest/April/1038817_Sanyo_Festival_4500x900-copy._UX1500_SX1500_.jpg" alt="" />
+                        </li>
+                    </ul>
+                </div>          
+    </section>
+    <br>
+    <div class="pagecontent" style="background-color:white">
+            
+        <div class="container">
+            {% csrf_token %}
+            <div class="colum5row1" id = 'colum5row1'>
+            </div>
+
+            <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" >
+                    <div class="modal-dialog">
+                      <div class="modal-content" style="width:100%!important; height: 120%!important ">
+                        <div class="modal-header">
+                          <button type="submit" class="close" data-dismiss="modal">&times;</button>
+                          <h4 class="modal-title" id="myModalLabel">Price History</h4>
+                        </div>
+                        <!-- <table class="modal-body" id="drTVLABM" style="width:95%!important"></table> -->
+                      <div class="modal-body" id="drd">
+                        <div class="drTVLABM" id="drTVLABM" style="width:100%!important"></div>
+                       <!-- <table class="drTVLABM" id="drTVLABM" style="width:95%!important"></table> -->
+                      </div>
+                    </div><!-- /.modal-content -->
+                  </div><!-- /.modal-dialog -->
+                </div><!-- /.modal -->
+
+        <div class="modal fade" id="imgModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" >
+            <div class="modal-dialog">
+              <div class="modal-content">
+              <div class="modal-header">
+                  <!-- <button type="submit" class="close" data-dismiss="modal">&times;</button> -->
+                </div>
+               <div class ="imglinkmodel" id = "imglinkmodel">
+              </div>
+              <!-- <img id="myImg" src="/static/facebook.png" /> -->
+            </div><!-- /.modal-content -->
+          </div><!-- /.modal-dialog -->
+        </div><!-- /.modal -->
+            </div>
+    </div>
+</section>
+<script src="/static/themes/js/jquery.flexslider-min.js"></script>
+<script type="text/javascript">
+
+
+    function LoadFashionPage(PCat)
+        {
+            $.ajax({
+                    url: '/base/LoadFashionPage/', 
+                    data :{
+                        'PCat':PCat,
+                        'csrfmiddlewaretoken' : $ ("input[name=csrfmiddlewaretoken]").val()
+                    },
+                    type: 'POST',
+                    dataType: 'json',         
+                    success: PoplupateFashionData,
+                    error: function (xhr, ajaxOptions, thrownError) 
+                    {
+                        alert(xhr.status);
+                        alert(thrownError);
+                    }
+                });  
+        }
+
+    function PoplupateFashionData(data, textStatus, jqXHR)
+        {   
+            $("#colum5row1").html("");
+            var colum5row1div=$('#colum5row1');
+            colum5row1div.empty();
+            for(var i = 0;i<data['TrendFP'].length;i++)
+            {
+                    var Rank = data['TrendFP'][i][0];
+                     var ProIm = '<div class="product_im " name="cname'+data['TrendFP'][i][8]+'" id ="'+data['TrendFP'][i][6]+'" style = "width:100%; height:360px;"><object data=" '+data['TrendFP'][i][6]+'" type="image/svg+jpg" width ="270px" height="360px"><img src="'+data['TrendFP'][i][6].replace('http://myntra.myntassets.com/','http://assets.myntassets.com/w_300/')+'" width ="270px" height="360px"/></object></div>';
+                     var PrName = data['TrendFP'][i][2];
+                     var Price = data['TrendFP'][i][4];
+                     var mrp = data['TrendFP'][i][5];
+                     var styleid = data['TrendFP'][i][1];
+                     var localurl = data['TrendFP'][i][7];
+                     var brand = data['TrendFP'][i][3];
+                     var comp = data['TrendFP'][i][8];
+                     if(brand == null ){
+                        brand = " ";
+                     }
+                     {
+                        var tableclose ='<div class = "span3 product-box" style = "margin-left:1.5%;margin-bottom:2%;cursor:pointer" id ="data order '+i+'">'+ProIm +'<div class="description" style = "width:100%;height:140px;cursor:pointer" id ='+data['TrendFP'][i][1]+' >'+'<br><p class="title"><b>'+PrName+'</b></p><strike>Rs.'+mrp+'</strike>'+'<br><p class="price"> Rs.'+Price+'</p></div><input type="button" class="product_des btn btn-inverse" id ='+data['TrendFP'][i][1]+' value="Price History" /><input type="button" class="btn btn-inverse" onclick=gotofashion('+data['TrendFP'][i][1]+') value="More details" style="margin-left:16%;" /></div>';
+                     }
+                    colum5row1div.append(tableclose);
+            }
+
+            $('.product_des').on('click',function(){
+                var StyleID = $(this).attr('id');
+                GetImgPriceHis(StyleID);
+            });
+
+            $('.product_im').on('click',function(){
+                var imgUrl = $(this).attr('id');
+                //alert(imgUrl);
+                var Comps = comp;
+                //alert(comp);
+                if(Comps == 'LR'){
+                    var link = '<img src="'+imgUrl.replace('pri_175','std_300_0')+'" style="width:405px!important;" />';
+                }
+                else{
+                    var link = '<object data=" '+imgUrl+'" type="image/svg+jpg" style="width:400px!important;"><img src="'+imgUrl.replace('http://myntra.myntassets.com/','http://assets.myntassets.com/')+'" style="width:400px!important;" /></object>';
+                }
+                //document.getElementById("#imglinkmodel").src = '"'+imgUrl+'"';
+                $("#imglinkmodel").html("");
+                var colum5row1div=$('#imglinkmodel');
+                colum5row1div.empty();
+                colum5row1div.append(link);
+                $('#imgModal').modal('show');
+            });
+        }
+
+    function LoadElectronicsPage(PCat)
+        {
+            $.ajax({
+                    url: '/base/LoadElectronicsPage/', 
+                    data :{
+                        'PCat':PCat,
+                        'csrfmiddlewaretoken' : $ ("input[name=csrfmiddlewaretoken]").val()
+                    },
+                    type: 'POST',
+                    dataType: 'json',         
+                    success: PoplupateElectronicsData,
+                    error: function (xhr, ajaxOptions, thrownError) 
+                    {
+                        alert(xhr.status);
+                        alert(thrownError);
+                    }
+                });
+        }
+
+    function PoplupateElectronicsData(data, textStatus, jqXHR)
+        {   
+            $("#colum5row1").html("");
+            var colum5row1div=$('#colum5row1');
+            colum5row1div.empty();
+            
+            if(ProductCat == 'LT')
+            {
+                for(var i = 0;i<data['TrendEP'].length;i++)
+                {
+                        var Rank = data['TrendEP'][i][0];
+                        var ASIN = data['TrendEP'][i][1];
+                        var ProIm = '<div class="product_im" id ="http://images.amazon.com/images/P/'+data['TrendEP'][i][1]+'.jpg" style = "width:100%; height:170px;"><object data= "http://images.amazon.com/images/P/'+data['TrendEP'][i][1]+'.01.MZZZZZZZ.jpg" style = "width:auto; height:auto"><img  src= "/static/themes/image/logo.png" style = "width:auto; height:auto" /></object></div>';
+                         var PrName = data['TrendEP'][i][2];
+                         var Price = data['TrendEP'][i][3];
+                         {
+                            var tableclose ='<div class = "span3 product-box" style = "width:180px;!important margin-left:1.5%;margin-bottom:2%;cursor:pointer" id ="data order '+i+'">'+ProIm +'<div class="description" style = "width:100%;height:200px;cursor:pointer" id ='+data['TrendEP'][i][1]+' >'+'<br><p class="title"><b>'+ PrName +'</b></p><p class="price"> Rs.' + Price + '</p></div><input type="button"   value="More details" id= '+data['TrendEP'][i][1]+' class="Ele btn btn-inverse" /></div>';
+                         }
+                        colum5row1div.append(tableclose);
+                }
+            }
+            else if(ProductCat == 'SP')
+            {
+                for(var i = 0;i<data['TrendEP'].length;i++)
+                {
+                        var Rank = data['TrendEP'][i][0];
+                        var ASIN = data['TrendEP'][i][1];
+                        var ProIm = '<div class="product_im" id ="http://images.amazon.com/images/P/'+data['TrendEP'][i][1]+'.jpg" style = "width:100%; height:170px;"><object data= "http://images.amazon.com/images/P/'+data['TrendEP'][i][1]+'.01.MZZZZZZZ.jpg" style = "width:auto; height:auto"><img  src= "/static/themes/image/logo.png" style = "width:auto; height:auto" /></object></div>';
+                         var PrName = data['TrendEP'][i][2];
+                         var Price = data['TrendEP'][i][3];
+                         {
+                            var tableclose ='<div class = "span3 product-box" style = "width:180px;!important margin-left:1.5%;margin-bottom:2%;cursor:pointer" id ="data order '+i+'">'+ProIm +'<div class="description" style = "width:100%;height:130px;cursor:pointer" id ='+data['TrendEP'][i][1]+' >'+'<br><p class="title"><b>'+ PrName +'</b></p><p class="price"> Rs.' + Price + '</p></div><input type="button"  value="More details" id= '+data['TrendEP'][i][1]+' class="Ele btn btn-inverse" /></div>';
+                         }
+                        colum5row1div.append(tableclose);
+                }
+            }
+            else if(ProductCat == 'TV')
+            {
+                for(var i = 0;i<data['TrendEP'].length;i++)
+                {
+                        var Rank = data['TrendEP'][i][0];
+                        var ASIN = data['TrendEP'][i][1];
+                        var ProIm = '<div class="product_im" id ="http://images.amazon.com/images/P/'+data['TrendEP'][i][1]+'.jpg" style = "width:100%; height:170px;"><object data= "http://images.amazon.com/images/P/'+data['TrendEP'][i][1]+'.01.MZZZZZZZ.jpg" style = "width:auto; height:auto"><img  src= "/static/themes/image/logo.png" style = "width:auto; height:auto" /></object></div>';
+                         var PrName = data['TrendEP'][i][2];
+                         var Price = data['TrendEP'][i][3];
+                         {
+                            var tableclose ='<div class = "span3 product-box" style = "width:180px;!important margin-left:1.5%;margin-bottom:2%;cursor:pointer" id ="data order '+i+'">'+ProIm +'<div class="description" style = "width:100%;height:170px;cursor:pointer" id ='+data['TrendEP'][i][1]+' >'+'<br><p class="title"><b>'+ PrName +'</b></p><p class="price"> Rs.' + Price + '</p></div><input type="button"   value="More details" id= '+data['TrendEP'][i][1]+' class="Ele btn btn-inverse" /></div>';
+                         }
+                        colum5row1div.append(tableclose);
+                }
+            }
+            
+            $('.Ele').on('click',function(){
+                var StyleID = $(this).attr('id');
+                 window.open("http://www.amazon.in/dp/"+StyleID+"/","_blank");
+                //GetImgPriceHis(StyleID);
+            });
+
+           /* $('.product_des').on('click',function(){
+                var StyleID = $(this).attr('id');
+                GetImgPriceHis(StyleID);
+            });*/
+
+            $('.product_im').on('click',function(){
+                var imgUrl = $(this).attr('id');
+                //alert(imgUrl);
+                var link = '<object data=" '+imgUrl+'" type="image/svg+jpg"><img src="'+imgUrl+'" /></object>';
+                $("#imglinkmodel").html("");
+                var colum5row1div=$('#imglinkmodel');
+                colum5row1div.empty();
+                colum5row1div.append(link);
+                $('#imgModal').modal('show');
+            });
+
+
+        }
+
+
+    function LoadAppliancesPage(PCat)
+        {
+            $.ajax({
+                    url: '/base/LoadAppliancesPage/', 
+                    data :{
+                        'PCat':PCat,
+                        'csrfmiddlewaretoken' : $ ("input[name=csrfmiddlewaretoken]").val()
+                    },
+                    type: 'POST',
+                    dataType: 'json',         
+                    success: PoplupateAppliancesData,
+                    error: function (xhr, ajaxOptions, thrownError) 
+                    {
+                        alert(xhr.status);
+                        alert(thrownError);
+                    }
+                });
+        }
+
+    
+        function PoplupateAppliancesData(data, textStatus, jqXHR)
+        {   
+            $("#colum5row1").html("");
+            var colum5row1div=$('#colum5row1');
+            colum5row1div.empty();
+            for(var i = 0;i<data['TrendAP'].length;i++)
+            {
+                    var Rank = data['TrendAP'][i][0];
+                    var ProIm = '<div class="product_im" id ="http://images.amazon.com/images/P/'+data['TrendAP'][i][1]+'.jpg" style = "width:100%; height:170px;"><object data= "http://images.amazon.com/images/P/'+data['TrendAP'][i][1]+'.01.20TTZZZZ.jpg" width ="auto" height="auto"><img  src= "/static/themes/image/logo.png" style = "width ="auto"; height="auto"" /></object></div>';
+                     var PrName = data['TrendAP'][i][2];
+                     var Price = data['TrendAP'][i][3];
+                     {
+                        var tableclose ='<div class = "span3 product-box" style = "margin-left:1.5%;margin-bottom:2%;cursor:pointer" id ="data order '+i+'">'+ProIm +'<div class="description" style = "width:100%;height:140px;cursor:pointer" id ='+data['TrendAP'][i][1]+' >'+'<br><p class="title"><b>'+ PrName +'</b></p><p class="price"> Rs.' + Price + '</p></div> <input type="button" id= '+data['TrendAP'][i][1]+' class="Apl btn btn-inverse" value="More details" /></div>';
+                     }
+                    colum5row1div.append(tableclose);
+            }
+
+            $('.Apl').on('click',function(){
+                var StyleID = $(this).attr('id');
+                 window.open("http://www.amazon.in/dp/"+StyleID+"/","_blank");
+                //GetImgPriceHis(StyleID);
+            });
+
+
+            /* $('.product_des').on('click',function(){
+                var StyleID = $(this).attr('id');
+                GetImgPriceHis(StyleID);
+            });*/
+
+            $('.product_im').on('click',function(){
+                var imgUrl = $(this).attr('id');
+                var link = '<object data=" '+imgUrl+'" type="image/svg+jpg"><img src="'+imgUrl+'" /></object>';
+                $("#imglinkmodel").html("");
+                var colum5row1div=$('#imglinkmodel');
+                colum5row1div.empty();
+                colum5row1div.append(link);
+                $('#imgModal').modal('show');
+            });
+        }
+
+    
+
+    function gotofashion(styleidforpageredirect)
+        {
+            window.open("http://www.myntra.com/dresses/aks/aks-women-black--pink-colourblocked-maxi-dress/"+styleidforpageredirect+"/buy","_blank");
+        }
+
+
+    function GetImgPriceHis(StyleID)
+        {
+            
+            $.ajax({
+                    url: '/base/getImgPriceHis/', 
+                    data :{
+                        'StyleID':StyleID,
+                        'csrfmiddlewaretoken' : $ ("input[name=csrfmiddlewaretoken]").val()
+                    },
+                    type: 'POST',
+                    async: false,
+                    dataType: 'json',               
+                    success: PopulateImgPriceHis,
+                    error: function (xhr, ajaxOptions, thrownError) 
+                    {
+                        alert(xhr.status);
+                        alert(thrownError);
+                    }
+                });  
+        }
+
+    function PopulateImgPriceHis(data, textStatus, jqXHR)
+        {
+                /*var oTable = $('#drTVLABM').DataTable( {
+                "bDestroy": true,
+                data: data['LABM'],
+                columns: [
+                    { title: "Date" },
+                    { title: "Price" },
+                    { title: "MRP" },
+                    { title: "Listing Postion"}
+                ],
+                "order": [ 0, 'desc'],
+                dom: 'lBfrtip',
+                buttons: [
+                    //'csvHtml5'
+                    
+                ],
+                "bAutoWidth": false,
+                "bFilter": false
+            } );*/    
+
+            var price = new Array();
+            var date = new Array();
+            var mrp = new Array();  
+            if(data != null)
+            {
+                sumprice = data['LABM']
+                for(var i = 0;i<data['LABM'].length;i++)
+                {
+                    date.push(data['LABM'][i][0]);
+                    price.push(parseInt(data['LABM'][i][1]));
+                    mrp.push(parseInt(data['LABM'][i][2]));
+                    //SlsPriceMAX.push(parseInt(data[i][3]));
+                }
+            }
+            //drawUnitsChart(prange,myntracount,lrcount,myntrasw,lrsw,'drSumPrice');
+
+            $("#drTVLABM").highcharts({
+                  title: {
+                        text: ''
+                    },
+
+                    subtitle: {
+                        text: ''
+                    },
+
+                    yAxis: {
+                        title: {
+                            text: 'Price & Mrp'
+                        }
+                    },
+
+                    xAxis: {
+                        title: {
+                            text: 'Date'
+                        },
+                        categories: date
+                    },
+
+                    legend: {
+                        layout: 'vertical',
+                        align: 'right',
+                        verticalAlign: 'middle'
+                    },
+
+                    plotOptions: {
+                        /*series: {
+                            pointStart: 2010
+                        }*/
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    series: [{
+                        name: 'Price',
+                        data: price
+                    },{
+                        name: 'MRP',
+                        data: mrp
+                    }]
+             });
+
+            $('#myModal').modal('show');
+        }
+
+
+    function myPopupFun()
+    {
+        var popup = document.getElementById('myPopup');
+        popup.classList.toggle('show');
+    }
+
+    function customalert(message)
+    {
+        $('#AlertMessage').html(message);
+        
+        $('#myAlert').modal('show');
+    }
+
+function ReportClean()
+{
+    var table1 = $('#colum5row1');
+    table1.empty();
+}
+
+var MatchName = '';
+var ProductCat = '';
+
+$(document).ready(function()
+    {
+        var CurrentPath = document.location.toString();
+        var ContentBody = $('.base1block');
+        ContentBody.empty();
+
+        if(CurrentPath.match(/Electronics/))
+        {
+            MatchName = "Electronics";
+            var MatchLength = MatchName.length;
+            var MatchNameIndex = CurrentPath.search("Electronics");
+            var DecodeCat = CurrentPath.substr(MatchNameIndex+MatchLength+1);
+            ProductCat =  decodeURIComponent(DecodeCat);
+            LoadElectronicsPage(ProductCat);
+            
+        }
+        else if(CurrentPath.match(/Fashion/))
+        {
+            MatchName = "Fashion";
+            var MatchLength = MatchName.length;
+            var MatchNameIndex = CurrentPath.search("Fashion");
+            var DecodeCat = CurrentPath.substr(MatchNameIndex+MatchLength+1);
+            ProductCat =  decodeURIComponent(DecodeCat);
+            LoadFashionPage(ProductCat);
+        }
+        else if(CurrentPath.match(/Appliances/))
+        {
+            MatchName = "Appliances";
+            var MatchLength = MatchName.length;
+            var MatchNameIndex = CurrentPath.search("Appliances");
+            var DecodeCat = CurrentPath.substr(MatchNameIndex+MatchLength+1);
+            ProductCat =  decodeURIComponent(DecodeCat);
+            LoadAppliancesPage(ProductCat);
+        }
+
+        
+        //alert(MatchName);
+        if(MatchName == 'Fashion'){
+           var slidesbox = $('.flexslider');
+           slidesbox.empty();
+           var slidesul = '<ul class="slides"><li><img src="/static/dress3.jpg" alt="" /></li><li><img src="/static/dress4.jpg" alt="" /></li></ul>';
+           slidesbox.append(slidesul);
+           slidefun();
+        }
+
+        if(MatchName == 'Electronics'){
+           var slidesbox = $('.flexslider');
+           slidesbox.empty();
+           var slidesul = '<ul class="slides"><li><img src="http://g-ecx.images-amazon.com/images/G/31/img16/PC/Feb/20Handpicked/mobile-bunk_1242x375_20-best-laptops.jpg" style="height:273px;" alt="" /></li><li><img src="http://g-ecx.images-amazon.com/images/G/31/img16/Wireless/Mobiles/CEEX/Honor6x/NoCashback/4500x900_finalday._UX1500_SX1500_.jpg" style="height:273px;" alt="" /></li><li><img src=http://g-ecx.images-amazon.com/images/G/31/img17/TV/Sanyo/FullHDFest/April/1038817_Sanyo_Festival_4500x900-copy._UX1500_SX1500_.jpg" style="height:273px;" alt="" /></li></ul>';
+           slidesbox.append(slidesul);
+           slidefun();
+        }
+
+
+        if(MatchName == 'Appliances'){
+           var slidesbox = $('.flexslider');
+           slidesbox.empty();
+           var slidesul = '<ul class="slides"><li><img src="/static/ac1.jpg" alt="" style="height:371px;" /></li><li><img src="/static/mw1.jpg" alt="" style="height:371px;" /></li><li><img src="/static/ref1.jpg" alt="" style="height:371px;" /></li><li><img src="/static/wm1.jpg" alt="" style="height:371px;" /></li></ul>';
+           slidesbox.append(slidesul);
+           slidefun();
+        }
+
+        
+
+    });
+
+function slidefun(){
+ $(function() {
+                $(document).ready(function() 
+                    {
+                    $('.flexslider').flexslider({
+                        animation: "fade",
+                        slideshowSpeed: 4000,
+                        animationSpeed: 600,
+                        controlNav: false,
+                        directionNav: true,
+                        controlsContainer: ".flex-container" // the container that holds the flexslider
+                    });
+                });
+            });
+}
+
+
+</script>
+{% endblock %} 

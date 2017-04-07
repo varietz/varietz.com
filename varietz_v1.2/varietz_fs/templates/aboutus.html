@@ -1,0 +1,88 @@
+{% extends 'base1.html' %}
+    {% block content %}
+    <section  class="homepage-slider" id="home-slider">
+				<div class="flexslider">
+					<ul class="slides">
+						<li>
+							<img src="http://g-ecx.images-amazon.com/images/G/31/img16/Wireless/Mobiles/CEEX/Honor6x/NoCashback/4500x900_finalday._UX1500_SX1500_.jpg" alt="" />
+						</li>
+						<li>
+							<img src="http://g-ecx.images-amazon.com/images/G/31/img17/TV/Sanyo/FullHDFest/April/1038817_Sanyo_Festival_4500x900-copy._UX1500_SX1500_.jpg" alt="" />
+						</li>
+					</ul>
+				</div>			
+	</section>
+	<br>
+    <section class="main-content">
+    			<div class="row">	
+    			{% csrf_token %}			
+					<div class="span12">
+						<div class="accordion" id="accordion2">
+							<div class="accordion-group">
+								<div class="accordion-heading">
+									<a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapseOne">Our Mission</a>
+								</div>
+								<div id="collapseOne" class="accordion-body in collapse">
+									<div class="accordion-inner">
+										<div class="row-fluid">
+											<p>To provide customers the latest, trending and best-selling products across a varietz of product categories. </p>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="accordion-group">
+								<div class="accordion-heading">
+									<a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapseTwo">What is Varietz.com</a>
+								</div>
+								<div id="collapseTwo" class="accordion-body collapse">
+									<div class="accordion-inner">
+										<div class="row-fluid">
+											<p>Varietz.com makes it easier for customers to discover the latest, trending and best-selling products across a varietz of product categories.</p>
+											<p> We collate information from all leading ecommerce platforms in the country, and provide a one stop destination for varietz and value seeing online shoppers.</p>
+										</div>
+									</div>
+								</div>
+							</div>
+							<!-- <div class="accordion-group">
+								<div class="accordion-heading">
+									<a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapseThree">Find / Follow Us</a>
+								</div>
+								<div id="collapseThree" class="accordion-body collapse">
+									<div class="accordion-inner">
+										<div class="row-fluid">
+											<label>Find us at:</label>
+											<p>1004 The Corporate Park, Plot 14-15, Sector 18, Vashi, Navi Mumbai 410210.</p>
+											<label>Follow us on:</label>
+											<p><a href="https://www.facebook.com/Varietzcom-1858958680982816/"><img width="25" height="25" src="/static/facebook.png" title="facebook" alt="facebook"/></a><a class="twitter-follow-button" href="https://twitter.com/varietz"><img width="25" height="25" src="/static/twitter.ico" title="twitter" alt="twitter"/></a></p>
+										</div>
+									</div>
+								</div>
+							</div> -->
+						</div>				
+					</div>				
+				</div>
+	</section>
+<script script type="text/javascript">
+$(function() {
+
+                $(document).ready(function() 
+                    {
+
+                    var slidesbox = $('.flexslider');
+           			slidesbox.empty();
+           			var slidesul = '<ul class="slides"><li><img src="/static/aboutus.jpg" alt="" style="height:273px;" /></ul>';
+           			slidesbox.append(slidesul);
+
+                    $('.flexslider').flexslider({
+                        animation: "fade",
+                        slideshowSpeed: 4000,
+                        animationSpeed: 600,
+                        controlNav: false,
+                        directionNav: true,
+                        controlsContainer: ".flex-container" // the container that holds the flexslider
+                    });
+                });
+            });
+</script>
+	
+{% endblock %}

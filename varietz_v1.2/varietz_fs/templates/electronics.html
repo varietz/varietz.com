@@ -1,0 +1,382 @@
+{% extends 'base1.html' %}
+    {% block content %}
+
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.13/css/jquery.dataTables.min.css">
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.2.4/css/buttons.dataTables.min.css">
+<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.4.0/css/font-awesome.min.css">
+
+<style>
+    table,th, td {
+    border: 1px solid black;
+    padding: 1px;
+    text-align: left;
+    font-size: 14px;
+    table-layout: fixed;
+}
+
+/*table th {
+    font-size: 12px
+}
+*/
+    table.dataTable tbody td {
+    word-break: break-word;
+    /*vertical-align: top;*/
+}
+/* Popup container - can be anything you want */
+.popup {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* The actual popup */
+.popup .popuptext {
+    visibility: hidden;
+    width: 200px;
+    background-color: #555;
+    color: #fff;
+    text-align: left;
+    border-radius: 6px;
+    padding: 8px 8px;
+    position: absolute;
+    z-index: 1;
+    top: 125%;
+    left: 50%;
+    margin-left: -80px;
+}
+
+.popup .show {
+    visibility: visible;
+    -webkit-animation: fadeIn 1s;
+    animation: fadeIn 1s;
+}
+
+/* Add animation (fade in the popup) */
+@-webkit-keyframes fadeIn {
+    from {opacity: 0;} 
+    to {opacity: 1;}
+}
+
+@keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity:1 ;}
+}
+
+#colum5row1 {width: 100%; float: left;}
+    .data-order {float: left;}
+
+</style>
+<div class="pagecontent" style="background-color:white">
+     <div class="container">
+
+        <div class="span3">
+        <!-- <div class="col-lg-2 col-md-2 col-sm-2 list-group nav-category pull-left section_box"> -->
+            <!-- <div class="section_heading"  style="">-->
+            <span class="col-lg-6" style="text-align:right;"></span>
+            {% csrf_token %}
+            <select name ="drPrC" class="drPrC" style="padding: 2px;border:1px solid #bbb;border-radius:4px; width: 100%">
+                <option value= "0">Select Product Category</option>
+                {% for PrCat in product_cat %}
+                    <option value= "{{PrCat.cat}}">{{PrCat.cat}}</option>
+                    <li> </li>
+                {% endfor %}
+            </select>
+            <!-- </div> -->  
+        <!-- </div> -->
+        </div>
+
+        <div class="span3">
+        <!-- <div class="col-lg-2 col-md-2 col-sm-2 list-group nav-category pull-left section_box"> -->
+            <!-- <div class="section_heading"  style=""> -->
+            <span class="col-lg-6" style="text-align:right;"></span>
+                <input type="submit" id="bttn" style=" padding: 4px; border:1px solid #bbb;border-radius:4px;width: 100%">            <!-- </div> -->
+        <!-- </div> -->
+        </div>
+        
+    </div>
+        
+    <div class="container">
+
+        <div class="colum5row1" id = 'colum5row1'>
+        </div>
+
+        <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" >
+                <div class="modal-dialog">
+                  <div class="modal-content" style="width:100%!important; height: 120%!important ">
+                    <div class="modal-header">
+                      <button type="submit" class="close" data-dismiss="modal">&times;</button>
+                      <h4 class="modal-title" id="myModalLabel">Price History</h4>
+                    </div>
+                    <!-- <table class="modal-body" id="drTVLABM" style="width:95%!important"></table> -->
+                  <div class="modal-body" id="drd">
+                   <table class="drTVLABM" id="drTVLABM" style="width:95%!important"></table>
+                  </div>
+                </div><!-- /.modal-content -->
+              </div><!-- /.modal-dialog -->
+            </div><!-- /.modal -->
+
+        <div class="modal fade" id="imgModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" >
+                <div class="modal-dialog">
+                  <div class="modal-content" style="width:70%!important">
+                  <div class="modal-header">
+                      <button type="submit" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                   <div class ="imglinkmodel" id = "imglinkmodel">
+                  </div>
+                </div><!-- /.modal-content -->
+              </div><!-- /.modal-dialog -->
+            </div><!-- /.modal -->
+        </div>
+</div>
+
+<script type="text/javascript">
+
+
+        $("#bttn").click(function(){
+                ReportClean();
+                var PCat = $(".drPrC option:selected").val();
+                    
+                $("#colum5row1").html("<img src='/static/th/loader.gif'>");
+                GetImgUrlEg(PCat);
+                $('#bttn-export').prop('disabled', false);
+            });
+
+
+    function GetImgUrlEg(PCat)
+        {
+            $.ajax({
+                    url: '/base/getImgUrlEg/', 
+                    data :{
+                        'PCat':PCat,
+                        'csrfmiddlewaretoken' : $ ("input[name=csrfmiddlewaretoken]").val()
+                    },
+                    type: 'POST',
+                    dataType: 'json',         
+                    success: PopulateImgUrlEg,
+                    error: function (xhr, ajaxOptions, thrownError) 
+                    {
+                        alert(xhr.status);
+                        alert(thrownError);
+                    }
+                });  
+        }
+
+    function PopulateImgUrlEg(data, textStatus, jqXHR)
+        {   
+                $("#colum5row1").html("");
+                var colum5row1div=$('#colum5row1');
+                colum5row1div.empty();
+                for(var i = 0;i<data['TrendA'].length;i++)
+                {
+                        var Rank = data['TrendA'][i][0];
+                         var ProIm = '<div class="product_im" name="cname'+data['TrendA'][i][8]+'" id ="'+data['TrendA'][i][6]+'" style = "width:150px; height:230px;"><object data=" '+data['TrendA'][i][6]+'" type="image/svg+jpg" width ="100%" height="230px"><img src="'+data['TrendA'][i][6].replace('http://myntra.myntassets.com/','http://assets.myntassets.com/w_300/')+'" width ="100%" height="230px"/></object></div>'
+                         var PrName = data['TrendA'][i][2];
+                         var Price = data['TrendA'][i][4];
+                         var mrp = data['TrendA'][i][5];
+                         var styleid = data['TrendA'][i][1];
+                         var localurl = data['TrendA'][i][7];
+                         var brand = data['TrendA'][i][3];
+                         var comp = data['TrendA'][i][8];
+                         if(brand == null ){
+                            brand = " ";
+                         }
+                         /*if (Comps == 'LR')
+                         {
+                            
+                            var tableclose ='<div class = "data-order" style = "width:200px; height:350px;cursor:pointer" id ="'+i+'">'+ProIm +'<div class="product_des" style = "width:180px;height:100px;cursor:pointer" id ='+data['TrendA'][i][1]+' >'+ Rank + ') '+ brand+' '+ PrName +'<br> Price : <strike>'+ mrp +'</strike> ' + Price + '</div> </div>';
+                         }
+                         else*/{
+                            var tableclose ='<div class = "data-order" style = "width:175px; height:400px;cursor:pointer" id ="'+i+'">'+ProIm +'<div class="product_des" style = "width:150px;height:100px;cursor:pointer" id ='+data['TrendA'][i][1]+' >'+ Rank + ') '+ PrName +'<br> Price : <strike>'+ mrp +'</strike> ' + Price + '</div><input type="button" onclick=gotowebsite('+data['TrendA'][i][1]+') value="Go to Site" /></div>';
+                         }
+                        colum5row1div.append(tableclose);
+                }
+
+                $('.product_des').on('click',function(){
+                    var StyleID = $(this).attr('id');
+                    GetImgPriceHis(StyleID);
+                });
+
+                $('.product_im').on('click',function(){
+                    var imgUrl = $(this).attr('id');
+                    var Comps = comp;
+                    //alert(comp);
+                    if(Comps == 'LR'){
+                        var link = '<img src="'+imgUrl.replace('pri_175','std_300_0')+'" style="width:405px!important;" />';
+                    }
+                    else{
+                        var link = '<object data=" '+imgUrl+'" type="image/svg+jpg" style="width:400px!important;"><img src="'+imgUrl.replace('http://myntra.myntassets.com/','http://assets.myntassets.com/')+'" style="width:400px!important;" /></object>';
+                    }
+                    $("#imglinkmodel").html("");
+                    var colum5row1div=$('#imglinkmodel');
+                    colum5row1div.empty();
+                    colum5row1div.append(link);
+                    $('#imgModal').modal('show');
+                });
+
+                for (i=0; i <100; i++)
+                    bs7[i] = new Array(100);
+                for(var i = 0;i<data['TrendA'].length;i++)
+                {
+                    bs7[i][0] = data['TrendA'][i][0];
+                    bs7[i][1] = data['TrendA'][i][2];
+                    bs7[i][2] = data['TrendA'][i][4];
+                    bs7[i][3] = data['TrendA'][i][5];
+                    bs7[i][4] = data['TrendA'][i][3];
+                }
+
+        }
+
+    function gotowebsite(styleidforpageredirect)
+        {
+            //alert("hi");
+            window.open("http://www.myntra.com/dresses/aks/aks-women-black--pink-colourblocked-maxi-dress/"+styleidforpageredirect+"/buy","_blank");
+        }
+
+    function GetImgPriceHis(StyleID)
+        {
+            
+            $.ajax({
+                    url: '/base/getImgPriceHis/', 
+                    data :{
+                        'StyleID':StyleID,
+                        'csrfmiddlewaretoken' : $ ("input[name=csrfmiddlewaretoken]").val()
+                    },
+                    type: 'POST',
+                    async: false,
+                    dataType: 'json',               
+                    success: PopulateImgPriceHis,
+                    error: function (xhr, ajaxOptions, thrownError) 
+                    {
+                        alert(xhr.status);
+                        alert(thrownError);
+                    }
+                });  
+        }
+
+    function PopulateImgPriceHis(data, textStatus, jqXHR)
+        {
+                var oTable = $('#drTVLABM').DataTable( {
+                "bDestroy": true,
+                data: data['LABM'],
+                columns: [
+                    { title: "Date" },
+                    { title: "Price" },
+                    { title: "MRP" },
+                    { title: "Listing Postion"}
+                ],
+                "order": [ 0, 'desc'],
+                dom: 'lBfrtip',
+                buttons: [
+                    //'csvHtml5'
+                    
+                ],
+                "bAutoWidth": false,
+                "bFilter": false
+            } );    
+
+            $('#myModal').modal('show');
+        }
+
+
+    function myPopupFun()
+    {
+        var popup = document.getElementById('myPopup');
+        popup.classList.toggle('show');
+    }
+
+    function customalert(message)
+    {
+        $('#AlertMessage').html(message);
+        
+        $('#myAlert').modal('show');
+    }
+
+    function ConvCSV(JSONData, ReportTitle, ShowLabel) {
+    
+    var arrData = typeof JSONData != 'object' ? JSON.parse(JSONData) : JSONData;
+    var CSV = '';    
+    //Set Report title in first row or line
+    
+    CSV += ReportTitle + '\r\n\n';
+
+    //This condition will generate the Label/Header
+    if (ShowLabel) {
+        var row = "";
+        
+        row = 'Rank,Name,Price,MRP,Brand';
+        //append Label row with line break
+        CSV += row + '\r\n';
+    }
+    
+    //1st loop is to extract each row
+    for (var i = 0; i < arrData.length; i++) {
+        var row = "";
+        
+        //2nd loop will extract each column and convert it in string comma-seprated
+        for (var index in arrData[i]) {
+            row += '"' + arrData[i][index] + '",';
+        }
+        row.slice(0, row.length - 1);
+        
+        //add a line break after each row
+        CSV += row + '\r\n';
+    }
+
+    if (CSV == '') {        
+        alert("Invalid data");
+        return;
+    }   
+    
+    //Generate a file name
+    var fileName = ReportTitle;
+    //this will remove the blank-spaces from the title and replace it with an underscore
+    //fileName += ReportTitle.replace(/ /g,"_");   
+    
+    //Initialize file format you want csv or xls
+    var uri = 'data:text/csv;charset=utf-8,' + escape(CSV);
+    
+    // Now the little tricky part.
+    // you can use either>> window.open(uri);
+    // but this will not work in some browsers
+    // or you will not get the correct file extension    
+    
+    //this trick will generate a temp <a /> tag
+    var link = document.createElement("a");    
+    link.href = uri;
+    
+    //set the visibility hidden so it will not effect on your web-layout
+    link.style = "visibility:hidden";
+    link.download = fileName + ".csv";
+    
+    //this part will append the anchor tag and remove it after automatic click
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+function ReportClean()
+{
+    var table1 = $('#colum5row1');
+    table1.empty();
+}
+
+var bs7 = new Array(100);
+    $(document).ready(function(){
+            tablecheck1 = 1;
+            $('.main_menus').removeClass('active');
+            $('.main_menus_whats-trending').addClass('active');
+            $('.main_menus_inside').removeClass('active');
+            $('.main_menus_inside_7-days-bestsellers').addClass('active');
+
+        //GetComps(PopulateComps);
+        $('#bttn-export').on('click',function(){
+            ConvCSV(bs7, "7 Day best Seller", true);
+        });
+
+    });
+</script>
+{% endblock %} 
